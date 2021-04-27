@@ -136,6 +136,42 @@ public final class MultiProducerSequencer extends AbstractSequencer
     }
 
     /**
+     * @see Sequencer#nextIntr(int)
+     * @author Carl Timmer
+     */
+    @Override
+    public long nextIntr(final int n) throws InterruptedException
+    {
+        if (n < 1 || n > bufferSize)
+        {
+            throw new IllegalArgumentException("n must be > 0 and < bufferSize");
+        }
+
+        long current = cursor.getAndAdd(n);
+
+        long nextSequence = current + n;
+        long wrapPoint = nextSequence - bufferSize;
+        long cachedGatingSequence = gatingSequenceCache.get();
+
+        if (wrapPoint > cachedGatingSequence || cachedGatingSequence > current)
+        {
+            long gatingSequence;
+            while (wrapPoint > (gatingSequence = Util.getMinimumSequence(gatingSequences, current)))
+            {
+                if (Thread.currentThread().isInterrupted())
+                {
+                    throw new InterruptedException();
+                }
+                LockSupport.parkNanos(1L); // TODO, should we spin based on the wait strategy?
+            }
+
+            gatingSequenceCache.set(gatingSequence);
+        }
+
+        return nextSequence;
+    }
+
+    /**
      * @see Sequencer#tryNext()
      */
     @Override

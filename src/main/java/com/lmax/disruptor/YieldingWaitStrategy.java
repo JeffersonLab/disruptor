@@ -49,13 +49,18 @@ public final class YieldingWaitStrategy implements WaitStrategy
     }
 
     private int applyWaitMethod(final SequenceBarrier barrier, final int counter)
-        throws AlertException
+        throws AlertException, InterruptedException // InterruptedException added by Carl Timmer
     {
         barrier.checkAlert();
 
         if (0 == counter)
         {
             Thread.yield();
+            // Next 3 lines added by Carl Timmer to make it interruptible
+            if (Thread.interrupted())
+            {
+                throw new InterruptedException();
+            }
         }
         else
         {

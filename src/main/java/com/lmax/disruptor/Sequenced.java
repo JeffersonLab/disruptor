@@ -51,6 +51,18 @@ public interface Sequenced
     long next(int n);
 
     /**
+     * Claim the next n events in sequence for publishing.
+     * This method is interruptible and will throw an
+     * InterruptedException if it is.
+     *
+     * @author Carl Timmer
+     * @param n the number of sequences to claim
+     * @return the highest claimed sequence value
+     * @throws InterruptedException if interrupted
+     */
+    long nextIntr(int n) throws InterruptedException;
+
+    /**
      * Attempt to claim the next event in sequence for publishing.  Will return the
      * number of the slot if there is at least <code>requiredCapacity</code> slots
      * available.
