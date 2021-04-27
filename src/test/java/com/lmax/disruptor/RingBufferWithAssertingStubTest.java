@@ -94,6 +94,12 @@ public class RingBufferWithAssertingStubTest
         }
 
         @Override
+        public long nextIntr(int n)
+        {
+            return next(n);
+        }
+
+        @Override
         public long tryNext() throws InsufficientCapacityException
         {
             return next();

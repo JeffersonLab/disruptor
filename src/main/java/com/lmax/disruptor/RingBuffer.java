@@ -278,6 +278,23 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
     }
 
     /**
+     * The same functionality as {@link RingBuffer#next(int)}.
+     * This method throws an InterruptedException if the thread
+     * which calls it is interrupted.
+     *
+     * @author Carl Timmer
+     * @see Sequencer#next(int)
+     * @param n number of slots to claim
+     * @return sequence number of the highest slot claimed
+     * @throws InterruptedException if thread is interrupted
+     */
+    @Override
+    public long nextIntr(int n) throws InterruptedException
+    {
+        return sequencer.nextIntr(n);
+    }
+
+    /**
      * <p>Increment and return the next sequence for the ring buffer.  Calls of this
      * method should ensure that they always publish the sequence afterward.  E.g.</p>
      * <pre>

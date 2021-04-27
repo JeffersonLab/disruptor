@@ -146,6 +146,46 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     }
 
     /**
+     * @see Sequencer#nextIntr(int)
+     * @author Carl Timmer
+     */
+    @Override
+    public long nextIntr(int n) throws InterruptedException
+    {
+        if (n < 1)
+        {
+            throw new IllegalArgumentException("n must be > 0");
+        }
+
+        long nextValue = this.nextValue;
+
+        long nextSequence = nextValue + n;
+        long wrapPoint = nextSequence - bufferSize;
+        long cachedGatingSequence = this.cachedValue;
+
+        if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
+        {
+            cursor.setVolatile(nextValue);  // StoreLoad fence
+
+            long minSequence;
+            while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
+            {
+                if (Thread.currentThread().isInterrupted())
+                {
+                    throw new InterruptedException();
+                }
+                LockSupport.parkNanos(1L);
+            }
+
+            this.cachedValue = minSequence;
+        }
+
+        this.nextValue = nextSequence;
+
+        return nextSequence;
+    }
+
+    /**
      * @see Sequencer#tryNext()
      */
     @Override
