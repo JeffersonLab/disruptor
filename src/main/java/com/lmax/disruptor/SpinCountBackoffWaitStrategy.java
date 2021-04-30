@@ -13,8 +13,14 @@ public final class SpinCountBackoffWaitStrategy implements WaitStrategy
     private final int spin_tries;
     private final WaitStrategy fallbackStrategy;
 
-    public SpinCountBackoffWaitStrategy(int spinTries,
-                                        WaitStrategy fallbackStrategy)
+
+    /**
+     * Construct {@link SpinCountBackoffWaitStrategy} with fallback to the specified wait strategy.
+     * @param spinTries number of spins before fallback wait strategy is implemented.
+     * @param fallbackStrategy  fallback wait strategy.
+     */
+    public SpinCountBackoffWaitStrategy(final int spinTries,
+                                        final WaitStrategy fallbackStrategy)
     {
         this.spin_tries = spinTries;
         this.fallbackStrategy = fallbackStrategy;
@@ -22,7 +28,7 @@ public final class SpinCountBackoffWaitStrategy implements WaitStrategy
 
 
     @Override
-    public long waitFor(long sequence, Sequence cursor, Sequence dependentSequence, SequenceBarrier barrier)
+    public long waitFor(final long sequence, final Sequence cursor, final Sequence dependentSequence, final SequenceBarrier barrier)
         throws AlertException, InterruptedException, TimeoutException
     {
         long availableSequence;
